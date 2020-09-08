@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><meta charset="utf-8"><meta name="generator" content="Hugo 0.68.3" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark"><title>Java集合(二)&nbsp;&ndash;&nbsp;Start</title><link rel="stylesheet" href="/css/core.min.c8791c608dc6e98419d8a4cd8e6b1b2fb45694d893d32dfee7202a5298fce349a5d07b960ca52be4586bc5e3456512eb.css" integrity="sha384-yHkcYI3G6YQZ2KTNjmsbL7RWlNiT0y3&#43;5yAqUpj840ml0HuWDKUr5FhrxeNFZRLr"><meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Java集合(二)" /><body><section id="header">
+    <div class="header wrap"><span class="header left-side"><a class="site home" href="/"><span class="site name">Start</span></a></span>
+        <span class="header right-side"><div class="nav wrap"><nav class="nav"><a class="nav item" href="/categories/">Categories</a><a class="nav item" href="/about/">About me</a></nav></div></span></div><div class="site slogan"><span class="title">极客精神</span></div></section><section id="content"><div class="article-container"><section class="article header">
+    <h1 class="article title">Java集合(二)</h1><p class="article date">Aug 04, 2020</p></section><article class="article markdown-body"><h2 id="上一节对list接口下的arraylist和linkedlist实现类的底层数据结构扩容机制线程安全简要做了一个分析这一节我们来看一下set接口下的实现类">上一节对List接口下的ArrayList和LinkedList实现类的底层数据结构、扩容机制、线程安全简要做了一个分析，这一节我们来看一下Set接口下的实现类</h2>
+<h3 id="一set接口下主要有两个实现类分别是hashset和treeset">一、Set接口下主要有两个实现类，分别是HashSet和TreeSet</h3>
+<p>1、HashSet的底层是HashMap</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kd">transient</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">E</span><span class="o">,</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">;</span>
+
+    <span class="c1">// Dummy value to associate with an Object in the backing Map
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Object</span> <span class="n">PRESENT</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">();</span>
+
+    <span class="cm">/**
+</span><span class="cm">     * Constructs a new, empty set; the backing &lt;tt&gt;HashMap&lt;/tt&gt; instance has
+</span><span class="cm">     * default initial capacity (16) and load factor (0.75).
+</span><span class="cm">     */</span>
+    <span class="kd">public</span> <span class="nf">HashSet</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="o">}</span>
+</code></pre></div><p>HashSet添加元素的方法</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">e</span><span class="o">,</span> <span class="n">PRESENT</span><span class="o">)==</span><span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><p>通过源码我们可以很清晰的看出，在HashSet中添加元素依然是使用了HashMap中的put方法，HashSet的key就是要添加的元素e,value是一个常量空对象<code>PRESENT</code>，key可以为null，但只能存一个null值。</p>
+<p><strong>HashSet是如何添加元素的？</strong>
+HashSet添加元素时，会先计算出对象的hashcode，判断插入的位置，同时也会与其他已插入元素的hashcode作比较，如果值不相等，插入成功；如果相等，调用equals()方法，如果两个对象不相同，插入成功，如果两个对象相同，插入失败。</p>
+<p>判断HashSet中是否包含某元素:</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">contains</span><span class="o">(</span><span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">o</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div><p>由于HashSet具有无序、不可重复的性质，所以也常常用HashSet做某些算法的去重工作。</p>
+<p>HashSet的删除方法：</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">remove</span><span class="o">(</span><span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">o</span><span class="o">)==</span><span class="n">PRESENT</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><p>HashSet具有以下特点：
+（1）唯一、无序（这里的无序指存入元素的顺序和输出时的顺序不一致）
+（2）判断两个元素是否相等调用了equals方法
+（3）是HashMap的皮包类，线程不安全</p>
+<p>LinkedHashSet继承自HashSet，底层数据结构是双向链表，有序</p>
+<p>2、TreeSet是基于TreeMap实现的，它的底层是红黑树(自排序的平衡二叉树)，是Set接口下SortedSet下NavigableSet的实现类
+TreeSet默认构造器：调用了TreeMap的构造器</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="nf">TreeSet</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="k">new</span> <span class="n">TreeMap</span><span class="o">&lt;</span><span class="n">E</span><span class="o">,</span><span class="n">Object</span><span class="o">&gt;());</span>
+    <span class="o">}</span>
+<span class="o">...</span>
+<span class="kd">public</span> <span class="nf">TreeMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">comparator</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><p>TreeSet对添加的元素(类型须一致)会以<code>红黑树</code>的形式排序存储，有两种排序方式：自然排序和定制排序，自然排序要求添加的元素实现<code>Comparable</code>接口，实现compareTo()方法，obj1.compareTo(obj2)方法返回0表明两个元素大小相等，返回整数表明obj1大于obj2，返回负数表明obj1小于obj2；</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">//String类实现的compareTo方法，用于比较两个字符串的大小
+</span><span class="c1"></span><span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">String</span> <span class="n">anotherString</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">len1</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">len2</span> <span class="o">=</span> <span class="n">anotherString</span><span class="o">.</span><span class="na">value</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">lim</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">len1</span><span class="o">,</span> <span class="n">len2</span><span class="o">);</span>
+        <span class="kt">char</span> <span class="n">v1</span><span class="o">[]</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
+        <span class="kt">char</span> <span class="n">v2</span><span class="o">[]</span> <span class="o">=</span> <span class="n">anotherString</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
+
+        <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">lim</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kt">char</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">v1</span><span class="o">[</span><span class="n">k</span><span class="o">];</span>
+            <span class="kt">char</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">v2</span><span class="o">[</span><span class="n">k</span><span class="o">];</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">c1</span> <span class="o">!=</span> <span class="n">c2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">c1</span> <span class="o">-</span> <span class="n">c2</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="n">k</span><span class="o">++;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">len1</span> <span class="o">-</span> <span class="n">len2</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div><p>定制排序需要在TreeSet构造方法中声明一个<code>comparator</code>，实现Comparator接口下的compare()方法</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">//TreeSet构造器
+</span><span class="c1"></span><span class="kd">public</span> <span class="nf">TreeSet</span><span class="o">(</span><span class="n">Comparator</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">comparator</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="k">new</span> <span class="n">TreeMap</span><span class="o">&lt;&gt;(</span><span class="n">comparator</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">...</span>
+<span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="n">T</span> <span class="n">o1</span><span class="o">,</span> <span class="n">T</span> <span class="n">o2</span><span class="o">);</span>
+</code></pre></div></article><section class="article author"><img class="avatar" src="https://d33wubrfki0l68.cloudfront.net/ddf49425628d8aec7523db143916b34ae1641e11/b97e8/images/gopher-side_color.svg" alt><div class="bio">用心写好每一篇博客</div><div class="details"></div>
+</section></div>
+<div class="article bottom"><section class="article navigation"><p><a class="link" href="/post/blog/"><span class="iconfont icon-article"></span>Java集合(一)</a></p></section><section class="article discussion"><div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "XXX" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a></section></div></section><section id="footer"><div class="footer-wrap">
+    <p class="copyright">©2020 codeqiang.</p>
+    <p class="powerby"><span>Powered&nbsp;by&nbsp;</span><a href="https://gohugo.io" 
+        target="_blank">Hugo</a><span>&nbsp;&amp;&nbsp;</span><a href="https://themes.gohugo.io/hugo-notepadium/" 
+        target="_blank">Notepadium</a></p></div></section><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/&#43;DiW/UqRcLbRjq" crossorigin="anonymous"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l&#43;B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd&#43;qj&#43;o24G5ZU2zJz" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+            onload="renderMathInElement(document.body);"></script><script src="/js/hljs.min.0799348a91dce12c6be4a73f943cfe78f181f4e6f6ec35c4af0fca1de377879f77cfab03c30f03a174d675737b5a9314.js" integrity="sha384-B5k0ipHc4Sxr5Kc/lDz&#43;ePGB9Ob27DXErw/KHeN3h593z6sDww8DoXTWdXN7WpMU"></script><script>hljs.initHighlightingOnLoad();</script></body>
+
+</html>
