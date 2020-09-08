@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Start</title>
+    <link>/hardQQ/test.git/</link>
+    <description>Recent content on Start</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>©2020 codeqiang.</copyright>
+    <lastBuildDate>Mon, 03 Aug 2020 20:39:43 +0800</lastBuildDate>
+    
+        <atom:link href="/hardQQ/test.git/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java集合(一)</title>
+      <link>/hardQQ/test.git/post.blog/</link>
+      <pubDate>Mon, 03 Aug 2020 20:39:43 +0800</pubDate>
+      
+      <guid>/hardQQ/test.git/post.blog/</guid>
+      <description>Java集合类主要分为Collection和Map两大接口，下面将对每个实现类做简要概述 一、List接口下有两个实现类，分别是ArrayLi</description>
+      
+    </item>
+    
+  </channel>
+</rss>
