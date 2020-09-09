@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><meta charset="utf-8"><meta name="generator" content="Hugo 0.68.3" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark"><title>多线程、高并发&nbsp;&ndash;&nbsp;Start</title><link rel="stylesheet" href="/css/core.min.c8791c608dc6e98419d8a4cd8e6b1b2fb45694d893d32dfee7202a5298fce349a5d07b960ca52be4586bc5e3456512eb.css" integrity="sha384-yHkcYI3G6YQZ2KTNjmsbL7RWlNiT0y3&#43;5yAqUpj840ml0HuWDKUr5FhrxeNFZRLr"><meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="多线程、高并发" /><body><section id="header">
+    <div class="header wrap"><span class="header left-side"><a class="site home" href="/"><span class="site name">Start</span></a></span>
+        <span class="header right-side"><div class="nav wrap"><nav class="nav"><a class="nav item" href="/categories/">Categories</a><a class="nav item" href="/about/">About me</a></nav></div></span></div><div class="site slogan"><span class="title">极客精神</span></div></section><section id="content"><div class="article-container"><section class="article header">
+    <h1 class="article title">多线程、高并发</h1><p class="article date">Sep 02, 2020</p></section><article class="article markdown-body"><h2 id="多线程基本框架">多线程基本框架</h2>
+<h3 id="一什么是线程进程和线程的区别">一、什么是线程，进程和线程的区别？</h3>
+<p><code>进程</code>是资源分配的基本单位，是正在运行的一个程序，一个进程可以包括很多线程；
+<code>线程</code>是cup执行和调度的基本单位，是程序中的一条执行路径；</p>
+<h3 id="二线程如何创建线程池有哪些其中的参数有哪些饱和策略有哪些线程池中任务的执行过程使用线程池的好处">二、线程如何创建？线程池有哪些？其中的参数有哪些？饱和策略有哪些？线程池中任务的执行过程？使用线程池的好处？</h3>
+<p><strong>线程的创建方式有四种；</strong></p>
+<ul>
+<li>
+<p>继承Thread</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">demo001</span> <span class="kd">extends</span> <span class="n">Thread</span><span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34; this is a sample Thread test&#34;</span><span class="o">);</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="n">demo001</span><span class="o">().</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></li>
+<li>
+<p>实现Runnable接口</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">demo002</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34; this is a Runnable test&#34;</span><span class="o">);</span>
+    <span class="o">}</span>
+      
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">demo002</span> <span class="n">demo002</span> <span class="o">=</span> <span class="k">new</span> <span class="n">demo002</span><span class="o">();</span>
+        <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">demo002</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></li>
+<li>
+<p>实现Callable接口，Callable接口提供了<code>call()</code>方法，它比<code>run()</code>方法更强大，它可以有返回值，还可以声明抛出异常。</p>
+<p>Java1.5中提供了Future接口来代表<code>call()</code>的返回值，并为Future接口提供了FutureTask实现类，该类实现了Future和Runnable接口，所以可以作为Thread的target</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">demo003</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">FutureTask</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">task</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FutureTask</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;(</span>
+                <span class="o">(</span><span class="n">Callable</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;)()-&gt;{</span>
+                    <span class="k">return</span> <span class="n">5</span><span class="o">;</span>
+                <span class="o">}</span>
+        <span class="o">);</span>
+        <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">task</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;子线程的返回值为&#34;</span><span class="o">+</span><span class="n">task</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">){</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+  
+</code></pre></div></li>
+<li>
+<p>创建线程池</p>
+<blockquote>
+<p>Executors类提供的四种线程池</p>
+<p>通过ThreadPoolExecutor类自定义线程池</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Java API中Executors提供了四种线程池:</strong></p>
+<ul>
+<li>
+<p><code>单例线程池</code>，只创建一个线程，使用于需要顺序执行各个任务。</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="n">ExecutorService</span> <span class="nf">newSingleThreadExecutor</span><span class="o">(</span><span class="n">ThreadFactory</span> <span class="n">threadFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">FinalizableDelegatedExecutorService</span>
+            <span class="o">(</span><span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="o">(</span><span class="n">1</span><span class="o">,</span> <span class="n">1</span><span class="o">,</span>
+                                    <span class="n">0L</span><span class="o">,</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">,</span>
+                                    <span class="k">new</span> <span class="n">LinkedBlockingQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;(),</span>
+                                    <span class="n">threadFactory</span><span class="o">));</span>
+    <span class="o">}</span>
+</code></pre></div></li>
+<li>
+<p><code>固定大小的线程池</code>，创建固定大小的线程池，核心最大线程数等于核心线程数，采用无界阻塞队列(最多可存放Integer.MAX_VALUE个任务)，适用于负载较重的场景，对当前线程数量进行控制。</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="n">ExecutorService</span> <span class="nf">newFixedThreadPool</span><span class="o">(</span><span class="kt">int</span> <span class="n">nThreads</span><span class="o">,</span> <span class="n">ThreadFactory</span> <span class="n">threadFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="o">(</span><span class="n">nThreads</span><span class="o">,</span> <span class="n">nThreads</span><span class="o">,</span>
+                                      <span class="n">0L</span><span class="o">,</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">,</span>
+                                      <span class="k">new</span> <span class="n">LinkedBlockingQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;(),</span>
+                                      <span class="n">threadFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div></li>
+<li>
+<p><code>可变长线程池</code> ,最多可以创建Integer.MAX_VALUE个线程，SynchronousQueue队列中只能存放一个任务，适用于负载较轻的场景。无限制的创建线程，容易造成线程过多，系统崩溃。</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="n">ExecutorService</span> <span class="nf">newCachedThreadPool</span><span class="o">(</span><span class="n">ThreadFactory</span> <span class="n">threadFactory</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="o">(</span><span class="n">0</span><span class="o">,</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">,</span>
+                                      <span class="n">60L</span><span class="o">,</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">,</span>
+                                      <span class="k">new</span> <span class="n">SynchronousQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;(),</span>
+                                      <span class="n">threadFactory</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div></li>
+<li>
+<p>执行定时和周期性任务</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="n">ScheduledExecutorService</span> <span class="nf">newScheduledThreadPool</span><span class="o">(</span><span class="kt">int</span> <span class="n">corePoolSize</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ScheduledThreadPoolExecutor</span><span class="o">(</span><span class="n">corePoolSize</span><span class="o">);</span>
+    <span class="o">}</span>
+</code></pre></div><p>一般我们不使用 Executors提供的线程池，而是自己通过<code>new ThreadPoolExecutor</code>创建线程池</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="nf">ThreadPoolExecutor</span><span class="o">(</span><span class="kt">int</span> <span class="n">corePoolSize</span><span class="o">,</span>
+                              <span class="kt">int</span> <span class="n">maximumPoolSize</span><span class="o">,</span>
+                              <span class="kt">long</span> <span class="n">keepAliveTime</span><span class="o">,</span>
+                              <span class="n">TimeUnit</span> <span class="n">unit</span><span class="o">,</span>
+                              <span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;</span> <span class="n">workQueue</span><span class="o">,</span>
+                              <span class="n">ThreadFactory</span> <span class="n">threadFactory</span><span class="o">,</span>
+                              <span class="n">RejectedExecutionHandler</span> <span class="n">handler</span><span class="o">)</span> 
+</code></pre></div></li>
+</ul>
+<p><strong>创建线程池时，有以下七个参数</strong></p>
+<ul>
+<li>
+<p><code>corePoolSize</code> 核心线程池数量</p>
+</li>
+<li>
+<p><code>maximumPoolSize</code> 最大线程池数量</p>
+</li>
+<li>
+<p><code>keepAliveTime </code>空闲线程存活时间</p>
+</li>
+<li>
+<p><code>timeUnit</code> 存活时间单位</p>
+</li>
+<li>
+<p><code>blockingQueue </code>阻塞队列</p>
+</li>
+<li>
+<p><code>threadFactory</code> 线程工厂</p>
+</li>
+<li>
+<p><code>rejectExecutionHandler</code> 饱和策略</p>
+</li>
+</ul>
+<p><strong>在ThreadPoolExecutor类中定义了四种饱和策略</strong></p>
+<ul>
+<li>
+<p>CallerRunsPolicy<code>调用者执行策略</code>，将任务回退给调用者执行(让调用任务的线程去执行任务，一般是主线程)</p>
+</li>
+<li>
+<p>AbortPolicy<code>中止策略</code> 直接抛出rejectExecutionException来拒绝处理新任务</p>
+</li>
+<li>
+<p>DiscardPolicy<code>丢弃策略</code> 直接丢弃新来的任务 (基本不用)</p>
+</li>
+<li>
+<p>DiscardOldestPolicy<code>弃老策略</code>丢弃队列中最早的未处理的任务</p>
+</li>
+</ul>
+<p><strong>线程池的工作流程</strong></p>
+<p><img  src="/assets/img/Thread/ThreadPool.png"
+        alt="ThreadPoolWorking"/></p>
+<p><strong>线程池的优点</strong></p>
+<ul>
+<li>减少资源的消耗(减少线程的创建和销毁，提高线程的复用性)</li>
+<li>提高响应速度(当有空闲线程时，任务到达即可运行，减少的创建的线程的过程)</li>
+<li>便于线程管理(当达到线程最大空闲时间时，自动回收线程)</li>
+</ul>
+<h3 id="三线程的生命周期常用的方法有哪些">三、线程的生命周期？常用的方法有哪些？</h3>
+<p>线程的生命周期分为六个阶段；</p>
+<p><code>初始</code>、<code>运行</code>、<code>阻塞</code>、<code>等待</code>、<code>超时等待</code>、<code>终止</code>；</p>
+<p><code>start()</code>  开启一个线程，并使该线程进入就绪状态，得到cup时间片后就可以运行。</p>
+<p><code>run()</code> 包含了线程的执行体，如果只调用run()方法，会被作为main线程下的一个普通方法来运行</p>
+<p><code>sleep()</code>使线程进入睡眠状态，不会释放锁</p>
+<p><code>wait()/wait(longtime)</code> 使线程进入等待状态，会释放锁</p>
+<p><code>notify()/notifyAll()</code> 唤醒等待中的线程</p>
+<p><code>join()</code> 暂停其他线程，使调用该方法的线程优先执行</p>
+<p><code>yield()</code>释放此线程的cpu执行权</p>
+<h3 id="四什么是线程安全如何保证线程安全死锁是什么锁优化">四、什么是线程安全？如何保证线程安全？死锁是什么？锁优化？</h3>
+<p><code>线程安全</code>:当一个线程在多线程的环境下执行和在单线程的环境下执行的结果一致，我们认为该线程就是线程安全的。</p>
+<p>保证线程安全的方式有两种：Synchronized关键字和Lock锁()  （二者区别在后面的文章介绍）</p>
+<p><code>死锁</code>是不同的线程互相占用着彼此的资源不放手，都在等待对方放手而造成的一种相互等待的情况。</p>
+<h3 id="五aqs的基本思想是什么">五、AQS的基本思想是什么？</h3>
+<p>当多线程访问共享资源时，如果共享资源处于空闲状态，则将当前线程设置有效的工作线程，并把共享资源修改为锁定状态，其他暂时获取不到锁的线程加入到等待队列中。</p>
+<h3 id="六java内存模型">六、Java内存模型</h3>
+<p><img  src="/assets/img/Thread/JMM.png"
+        alt="JMM"/></p>
+<p>当Java线程去操作数据时，会先从主内存中读取数据到自己的工作内存(cpu缓存)中，工作内存保存着数据的副本，线程修改完后再从工作内存将数据刷回主内存。</p>
+<p>Java内存模型的三个重要概念：<strong>原子性、有序性、可见性</strong></p>
+<p><code>原子性</code>保证了一组操作要么全部执行，要么都不执行</p>
+<p><code>有序性</code>即程序执行的顺序按代码的先后顺序执行</p>
+<p><code>可见性</code>即线程间对数据的修改是立即可见的</p>
+<p>当用Volatile修饰变量时，<code>Volatile</code>可以保证线程间的可见性和禁止指令重排序，但是不能保证原子性。当线程把工作内存中的变量值修改后，新的值会被强制刷新回主内存，其他线程工作内存中的变量值失效，会重新去主内存中读取新的值。</p>
+<p>当进行i++操作时，其实分为三步，1、线程读取i值，2、计算i值 temp=i+1，3、对i进行赋值 i=temp; 即使对i进行volatile修饰后，依然不能保证该操作的原子性。</p>
+<h5 id="我是代码强你知道的越多你不知道的就越多">我是代码强，你知道的越多，你不知道的就越多！</h5>
+</article><section class="article author"><img class="avatar" src="https://d33wubrfki0l68.cloudfront.net/ddf49425628d8aec7523db143916b34ae1641e11/b97e8/images/gopher-side_color.svg" alt><div class="bio">用心写好每一篇博客</div><div class="details"></div>
+</section></div>
+<div class="article bottom"><section class="article navigation"><p><a class="link" href="/post/collections3/"><span class="iconfont icon-article"></span>Java集合(三)</a></p></section><section class="article discussion"><div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "XXX" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a></section></div></section><section id="footer"><div class="footer-wrap">
+    <p class="copyright">©2020 codeqiang.</p>
+    <p class="powerby"><span>Powered&nbsp;by&nbsp;</span><a href="https://gohugo.io" 
+        target="_blank">Hugo</a><span>&nbsp;&amp;&nbsp;</span><a href="https://themes.gohugo.io/hugo-notepadium/" 
+        target="_blank">Notepadium</a></p></div></section><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/&#43;DiW/UqRcLbRjq" crossorigin="anonymous"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l&#43;B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd&#43;qj&#43;o24G5ZU2zJz" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+            onload="renderMathInElement(document.body);"></script><script src="/js/hljs.min.0799348a91dce12c6be4a73f943cfe78f181f4e6f6ec35c4af0fca1de377879f77cfab03c30f03a174d675737b5a9314.js" integrity="sha384-B5k0ipHc4Sxr5Kc/lDz&#43;ePGB9Ob27DXErw/KHeN3h593z6sDww8DoXTWdXN7WpMU"></script><script>hljs.initHighlightingOnLoad();</script></body>
+
+</html>

@@ -14,40 +14,40 @@
     
     <item>
       <title>多线程、高并发</title>
-      <link>/post/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</link>
+      <link>/post/thread/</link>
       <pubDate>Wed, 02 Sep 2020 10:55:08 +0800</pubDate>
       
-      <guid>/post/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</guid>
+      <guid>/post/thread/</guid>
       <description>多线程基本框架 一、什么是线程，进程和线程的区别？ 进程是资源分配的基本单位，是正在运行的一个程序，一个进程可以包括很多线程； 线程是cup执行和</description>
       
     </item>
     
     <item>
       <title>Java集合(三)</title>
-      <link>/post/%E9%9B%86%E5%90%883/</link>
+      <link>/post/collections3/</link>
       <pubDate>Wed, 05 Aug 2020 20:40:59 +0800</pubDate>
       
-      <guid>/post/%E9%9B%86%E5%90%883/</guid>
+      <guid>/post/collections3/</guid>
       <description>Map接口下的实现类主要有HashMap、HashTable、ConcurrentHashMap、TreeMap 一、HashMap 底层数据结</description>
       
     </item>
     
     <item>
       <title>Java集合(二)</title>
-      <link>/post/%E9%9B%86%E5%90%882/</link>
+      <link>/post/collections2/</link>
       <pubDate>Tue, 04 Aug 2020 20:40:55 +0800</pubDate>
       
-      <guid>/post/%E9%9B%86%E5%90%882/</guid>
+      <guid>/post/collections2/</guid>
       <description>上一节对List接口下的ArrayList和LinkedList实现类的底层数据结构、扩容机制、线程安全简要做了一个分析，这一节我们来看一下</description>
       
     </item>
     
     <item>
       <title>Java集合(一)</title>
-      <link>/post/blog/</link>
+      <link>/post/collections1/</link>
       <pubDate>Mon, 03 Aug 2020 20:39:43 +0800</pubDate>
       
-      <guid>/post/blog/</guid>
+      <guid>/post/collections1/</guid>
       <description>Java集合类主要分为Collection和Map两大接口，下面将对每个实现类做简要概述 一、List接口下有两个实现类，分别是ArrayLi</description>
       
     </item>
